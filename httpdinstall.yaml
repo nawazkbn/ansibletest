@@ -1,0 +1,7 @@
+---
+ - hosts: mygroup
+   vars:
+   tasks:
+      - name: installing httpd package
+        yum: name=httpd state=present
+
