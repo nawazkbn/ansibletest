@@ -1,0 +1,32 @@
+---
+- hosts: mygroup
+  become: true
+  vars:
+   - pkg: httpd
+  tasks:
+      - name: installing httpd package
+        yum: name="{{pkg}}" state=present
+        register: httpd_install
+        tags: 
+          - install
+      - name: validation of httpd
+        command: ls -al /sbin/httpd
+        register: http_validation
+        tags:
+          - validate
+
+      - name: starting httpd service
+        service: name="{{pkg}}" state=started enabled=yes
+        when: http_validation|success and httpd_install|success
+        tags:
+          - start
+      - name: stopping httpd package
+        service: name="{{pkg}}" state=stopped enabled=no
+        register: http_stop
+        tags:
+          - stop    
+      - name: uninstalling httpd package
+        yum: name="{{pkg}}" state=absent
+        when: http_stop|success
+        tags:
+          - uninstall
